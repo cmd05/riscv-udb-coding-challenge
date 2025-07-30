@@ -4,6 +4,7 @@ import os
 
 class c_header_gen:
     ACCESS_TYPES = ['s', 'u', 'vs', 'vu']
+    FOUR_SPACE = (' ' * 4)
 
     def __init__(self, data):
         self.var_name = self.safe_format_name(data['name'])
@@ -17,16 +18,18 @@ class c_header_gen:
         self.sail = self.to_c_str(data.get("sail()", ""))
         self.data_indep_timing = int(data.get("data_independent_timing", -1))
 
+        # 'definedBy' data
         defined_by_data = data.get("definedBy", tuple())
         if not defined_by_data:
             self.defined_by = (self.to_c_str("anyOf"), [])
         else:
             k = next(iter(defined_by_data))
             self.defined_by = (
-                self.to_c_str(k),
-                [self.to_c_str(v) for v in defined_by_data[k]]
+                self.to_c_str(k), # mode
+                [self.to_c_str(v) for v in defined_by_data[k]] # extensions list
             )
 
+        # 'access' data
         self.access = data.get("access", {})
         for k in self.ACCESS_TYPES:
             self.access[k] = self.to_c_str(self.access.setdefault(k, ""))
@@ -38,18 +41,15 @@ class c_header_gen:
     def to_c_str(self, val):
         if isinstance(val, str):
             return '"' + val.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n') + '"'
-        elif isinstance(val, bool):
-            return "1" if val else "0"
-        elif isinstance(val, (int, float)):
-            return str(val)
         return '""'
 
+    # parse encoding variable in C struct format
     def parse_encoding_var(self, var):
         name = self.to_c_str(var.get("name", ""))
         location = self.to_c_str(str(var.get("location", "")))
         not_val = var.get("not", -1)
 
-        return (' ' * 4) + f'{{ {name}, {location}, {not_val} }}'
+        return self.FOUR_SPACE + f'{{ {name}, {location}, {not_val} }}'
 
     def safe_format_name(self, name):
         return name.replace('.', '_')
@@ -57,7 +57,9 @@ class c_header_gen:
     def emit(self, output_filename):
         name_upper = self.var_name.upper()
 
+        # encoding variables
         vars_str = ",\n".join([self.parse_encoding_var(v) for v in self.variables])
+        # definedBy extensions
         exts_str = ", ".join(self.defined_by[1])
 
         header_str = f"""#ifndef INST_{name_upper}_H
@@ -101,8 +103,6 @@ const inst_t {self.var_name}_inst = {{
     .sail = {self.sail}
 }};
 
-extern inst_t {self.var_name};
-
 #endif /* INST_{name_upper}_H */
 """
 
@@ -113,7 +113,7 @@ extern inst_t {self.var_name};
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("infile", help="YAML input file (ex. c.add.yaml)")
+    parser.add_argument("infile", help="YAML input file path (ex. c.add.yaml)")
     parser.add_argument("-o", "--output", help="C header output file", default=None)
 
     return parser.parse_args()
@@ -123,10 +123,10 @@ def main():
     data = yaml.safe_load(open(args.infile))
 
     out_basename = os.path.splitext(os.path.basename(args.infile))[0]
-    out_name = args.output or f"{out_basename}.h"
+    out_filename = args.output or f"{out_basename}.h"
 
-    gen = c_header_gen(data)
-    gen.emit(out_name)
+    generator = c_header_gen(data)
+    generator.emit(out_filename)
 
 if __name__ == "__main__":
     main()
