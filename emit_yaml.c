@@ -84,12 +84,17 @@ void emit_yaml(FILE* out, const inst_t* instruction) {
     }
 }
 
-int main() {
-    const char* fname = "c_emit.yaml"; 
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Required output filename parameter\n");
+        return 1;
+    }
+
+    const char* fname = argv[1]; 
     FILE* out = fopen(fname, "w");
 
     if (!out) {
-        perror("Failed to open output file");
+        fprintf(stderr, "Failed to open output file\n");
         return 1;
     }
 
