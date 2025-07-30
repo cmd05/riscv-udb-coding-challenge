@@ -1,0 +1,11 @@
+{
+    "python.REPL.enableREPLSmartSend": false,
+    "files.associations": {
+        "*.fragment": "glsl",
+        "*.vertex": "glsl",
+        "c_add.h": "c",
+        "stdio.h": "c",
+        "inst_types.h": "c",
+        "c.add.h": "c"
+    }
+}
