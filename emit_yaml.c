@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 
     if (!out) {
         fprintf(stderr, "Failed to open output file\n");
-        return 1;
+        return 2;
     }
 
     emit_yaml(out, &c_add_inst);
