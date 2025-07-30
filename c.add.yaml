@@ -1,3 +1,8 @@
+# Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: BSD-3-Clause-Clear
+
+# yaml-language-server: $schema=../../../../schemas/inst_schema.json
+
 $schema: "inst_schema.json#"
 kind: instruction
 name: c.add
@@ -28,6 +33,10 @@ operation(): |
   XReg t0 = X[xd];
   XReg t1 = X[xs2];
   X[xd] = t0 + t1;
+
+# SPDX-SnippetBegin
+# SPDX-FileCopyrightText: 2017-2025 Contributors to the RISCV Sail Model <https://github.com/riscv/sail-riscv/blob/master/LICENCE>
+# SPDX-License-Identifier: BSD-2-Clause
 sail(): |
   {
     let rs1_val = X(rd);
@@ -35,3 +44,5 @@ sail(): |
     X(rd) = rs1_val + rs2_val;
     RETIRE_SUCCESS
   }
+
+# SPDX-SnippetEnd
