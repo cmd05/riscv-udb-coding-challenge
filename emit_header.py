@@ -122,8 +122,7 @@ def main():
     args = parse_args()
     data = yaml.safe_load(open(args.infile))
 
-    out_basename = os.path.splitext(os.path.basename(args.infile))[0]
-    out_filename = args.output or f"{out_basename}.h"
+    out_filename = args.output or f"{data['name']}.h"
 
     generator = c_header_gen(data)
     generator.emit(out_filename)
